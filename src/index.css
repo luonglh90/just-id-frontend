@@ -1,0 +1,277 @@
+@import "tailwindcss";
+
+/* ===== Theme Configuration ===== */
+@theme inline {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-slot-available: oklch(0.52 0.17 155);
+  --color-slot-warning: oklch(0.60 0.18 55);
+  --color-slot-full: oklch(0.55 0.22 25);
+
+  --animate-fade-in: fade-in 0.5s ease-out;
+  --animate-slide-up: slide-up 0.4s ease-out;
+  --animate-pulse-soft: pulse-soft 2s infinite;
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-in;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ===== Light Theme (default) ===== */
+:root {
+  --brand-gradient: linear-gradient(135deg, oklch(0.6 0.25 250) 0%, oklch(0.6 0.25 300) 100%);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.2 0 0);
+  --primary: oklch(0 0 0);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.97 0.01 270);
+  --muted: oklch(0.95 0 0);
+  --muted-foreground: oklch(0.5 0 0);
+  --accent: oklch(0.6 0.25 285);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.55 0.22 25);
+  --border: oklch(0.92 0 0);
+  --input: oklch(1 0 0);
+  --ring: oklch(0.6 0.25 285);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0 0 0);
+  --radius: 1.5rem;
+}
+
+/* Ensure background covers the whole page */
+#root, body, html {
+  height: 100%;
+}
+
+/* ===== Base Styles ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Background Gradient ===== */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--background);
+}
+
+.font-code {
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  font-feature-settings: "tnum";
+}
+
+.brand-text {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.brand-bg {
+  background: var(--brand-gradient) !important;
+  background-size: 200% auto;
+}
+
+.brand-bg:not(:disabled) {
+  color: #fff !important;
+}
+
+.brand-bg:not(:disabled):hover {
+  background-position: right center;
+}
+
+/* Disabled: solid surface so label stays readable (no grayscale + opacity on gradient) */
+.brand-bg:disabled {
+  background: var(--secondary) !important;
+  color: var(--muted-foreground) !important;
+}
+
+/* Home paste field (antd reset + WebKit: enforce inset so text/placeholder clears the frame) */
+textarea.home-paste-input {
+  box-sizing: border-box;
+  padding: 1.0rem !important;
+}
+@media (min-width: 740px) {
+  textarea.home-paste-input {
+    padding: 1.25rem !important;
+  }
+}
+.home-paste-input::placeholder {
+  line-height: 1.45;
+}
+
+.snap-effect {
+  animation: snap-in 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes snap-in {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== Quill Editor Theme Overrides ===== */
+.ql-toolbar.ql-snow {
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) var(--radius) 0 0 !important;
+  background: var(--secondary) !important;
+}
+
+.ql-toolbar.ql-snow button {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 4px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.ql-toolbar.ql-snow button svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.ql-toolbar.ql-snow .ql-formats {
+  fill: var(--muted-foreground) !important;
+}
+
+.ql-snow .ql-picker-label {
+  color: var(--muted-foreground) !important;
+}
+
+.ql-snow .ql-picker-options {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+}
+
+.ql-snow .ql-active .ql-stroke,
+.ql-snow button:hover .ql-stroke {
+  stroke: var(--primary) !important;
+}
+
+.ql-snow .ql-active .ql-fill,
+.ql-snow button:hover .ql-fill {
+  fill: var(--primary) !important;
+}
+
+.ql-toolbar button:hover,
+.ql-toolbar button.ql-active {
+  background: var(--accent) !important;
+  border-radius: 6px;
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* ===== Content Display ===== */
+.content-display {
+  line-height: 1.7;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.content-display p {
+  margin-bottom: 0.5em;
+}
+
+.content-display a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.content-display pre {
+  background: var(--secondary);
+  padding: 1rem;
+  border-radius: var(--radius);
+  overflow-x: auto;
+  margin: 0.5em 0;
+}
+
+.content-display code {
+  font-size: 0.9em;
+}
+
+.content-display ul,
+.content-display ol {
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+/* ===== Card Effect ===== */
+.glass-card {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  /* Removed heavy shadow for minimal look */
+}

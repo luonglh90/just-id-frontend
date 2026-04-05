@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>copy.baby - Ephemeral Paste Sharing</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <style>
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+        
+        * {
+            font-family: 'Geist', sans-serif;
+        }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: #e4e4e7;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glow-button {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .glow-button:hover {
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .glow-button:active {
+            transform: translateY(0);
+        }
+        
+        textarea::placeholder {
+            color: rgba(228, 228, 231, 0.4);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.4s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .timer-pulse {
+            animation: timerPulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes timerPulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
+    </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-screen">
+  <div id="app" class="min-h-screen flex flex-col"></div>
+  <script>
+        const app = document.getElementById('app');
+
+        // Simulated data storage
+        const pastes = new Map();
+
+        function generateId() {
+            return Math.random().toString(36).substring(2, 6).toUpperCase();
+        }
+
+        function formatTime(ms) {
+            if (ms <= 0) return 'Expired';
+            const seconds = Math.ceil(ms / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return minutes > 0 ? `${minutes}m ${secs}s` : `${secs}s`;
+        }
+
+        function renderHome() {
+            app.innerHTML = `
+                <div class="flex-1 flex flex-col items-center justify-center px-4 py-12">
+                    <div class="text-center mb-12 fade-in">
+                        <h1 class="text-6xl md:text-7xl font-bold mb-4">
+                            <span class="gradient-text">copy.baby</span>
+                        </h1>
+                        <p class="text-xl text-zinc-400">Share content that disappears in 2 minutes</p>
+                    </div>
+
+                    <div class="w-full max-w-2xl mb-8 fade-in" style="animation-delay: 0.1s">
+                        <textarea 
+                            id="pasteInput"
+                            class="w-full h-64 bg-zinc-900 border border-zinc-700 rounded-xl p-6 text-lg text-zinc-100 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none font-mono"
+                            placeholder="Paste your content here..."
+                        ></textarea>
+                    </div>
+
+                    <button 
+                        id="getCodeBtn"
+                        class="glow-button mb-12 px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg font-semibold text-white hover:from-blue-600 hover:to-purple-600"
+                    >
+                        Get Code
+                    </button>
+
+                    <div class="w-full max-w-2xl grid grid-cols-3 gap-4 fade-in" style="animation-delay: 0.2s">
+                        <div class="glass-effect rounded-lg p-4 text-center">
+                            <div class="flex justify-center mb-3">
+                                <i data-lucide="lock" class="w-5 h-5 text-blue-400"></i>
+                            </div>
+                            <p class="text-sm text-zinc-400">No Login</p>
+                        </div>
+                        <div class="glass-effect rounded-lg p-4 text-center">
+                            <div class="flex justify-center mb-3">
+                                <i data-lucide="trash-2" class="w-5 h-5 text-blue-400"></i>
+                            </div>
+                            <p class="text-sm text-zinc-400">Auto Delete</p>
+                        </div>
+                        <div class="glass-effect rounded-lg p-4 text-center">
+                            <div class="flex justify-center mb-3">
+                                <i data-lucide="eye-off" class="w-5 h-5 text-blue-400"></i>
+                            </div>
+                            <p class="text-sm text-zinc-400">No History</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            lucide.createIcons();
+
+            document.getElementById('getCodeBtn').addEventListener('click', () => {
+                const content = document.getElementById('pasteInput').value.trim();
+                if (content) {
+                    const id = generateId();
+                    const expiryTime = Date.now() + 2 * 60 * 1000;
+                    pastes.set(id, { content, expiryTime });
+                    renderResult(id);
+                }
+            });
+
+            document.getElementById('pasteInput').addEventListener('paste', (e) => {
+                setTimeout(() => {
+                    const content = document.getElementById('pasteInput').value.trim();
+                    if (content) {
+                        const id = generateId();
+                        const expiryTime = Date.now() + 2 * 60 * 1000;
+                        pastes.set(id, { content, expiryTime });
+                        renderResult(id);
+                    }
+                }, 10);
+            });
+        }
+
+        function renderResult(id) {
+            const paste = pastes.get(id);
+            if (!paste) {
+                renderHome();
+                return;
+            }
+
+            const shortLink = `${window.location.origin}/${id}`;
+
+            app.innerHTML = `
+                <div class="flex-1 flex flex-col items-center justify-center px-4 py-12">
+                    <div class="mb-8 fade-in">
+                        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                            <i data-lucide="check" class="w-8 h-8 text-white"></i>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-12 fade-in" style="animation-delay: 0.1s">
+                        <p class="text-zinc-400 text-sm mb-3">Your paste ID</p>
+                        <p class="text-6xl font-bold font-mono tracking-wider text-white">${id}</p>
+                    </div>
+
+                    <div class="w-full max-w-2xl mb-8 fade-in" style="animation-delay: 0.2s">
+                        <div class="glass-effect rounded-lg p-6">
+                            <p class="text-zinc-400 text-sm mb-3">Share this link</p>
+                            <div class="flex items-center gap-3">
+                                <input 
+                                    type="text" 
+                                    value="${shortLink}"
+                                    readonly
+                                    class="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3 text-sm font-mono text-zinc-100"
+                                />
+                                <button 
+                                    id="copyBtn"
+                                    class="glow-button px-6 py-3 bg-blue-500 rounded-lg text-white font-semibold"
+                                >
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-12 fade-in" style="animation-delay: 0.3s">
+                        <div class="glass-effect rounded-lg px-8 py-4">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="clock" class="w-5 h-5 text-orange-400 timer-pulse"></i>
+                                <span class="font-mono text-lg">
+                                    Expires in <span id="timer" class="text-orange-400 font-semibold">2m 0s</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 fade-in" style="animation-delay: 0.4s">
+                        <button 
+                            id="newBtn"
+                            class="glow-button px-8 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white font-semibold hover:bg-zinc-700"
+                        >
+                            Create New
+                        </button>
+                        <button 
+                            id="viewBtn"
+                            class="glow-button px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg text-white font-semibold"
+                        >
+                            View Paste
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            lucide.createIcons();
+
+            document.getElementById('copyBtn').addEventListener('click', () => {
+                navigator.clipboard.writeText(shortLink);
+                const btn = document.getElementById('copyBtn');
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.innerHTML = 'Copy';
+                }, 1500);
+            });
+
+            document.getElementById('newBtn').addEventListener('click', renderHome);
+
+            document.getElementById('viewBtn').addEventListener('click', () => {
+                renderView(id);
+            });
+
+            const timerEl = document.getElementById('timer');
+            const updateTimer = () => {
+                if (paste && paste.expiryTime) {
+                    const remaining = paste.expiryTime - Date.now();
+                    timerEl.textContent = formatTime(remaining);
+                    if (remaining <= 0) {
+                        pastes.delete(id);
+                        renderExpired();
+                    } else {
+                        setTimeout(updateTimer, 100);
+                    }
+                }
+            };
+            updateTimer();
+        }
+
+        function renderView(id) {
+            const paste = pastes.get(id);
+
+            if (!paste) {
+                renderNotFound();
+                return;
+            }
+
+            const remaining = paste.expiryTime - Date.now();
+            if (remaining <= 0) {
+                pastes.delete(id);
+                renderExpired();
+                return;
+            }
+
+            app.innerHTML = `
+                <div class="flex-1 flex flex-col">
+                    <div class="glass-effect border-b border-zinc-700">
+                        <div class="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
+                            <div>
+                                <p class="text-zinc-400 text-sm mb-1">Paste ID</p>
+                                <p class="font-mono text-2xl font-bold text-white">${id}</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="flex items-center gap-2 inline-flex glass-effect px-4 py-2 rounded-lg">
+                                    <i data-lucide="clock" class="w-4 h-4 text-orange-400 timer-pulse"></i>
+                                    <span class="font-mono text-sm">Expires <span id="viewTimer" class="text-orange-400 font-semibold">in 2m</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 flex items-center justify-center px-6 py-12">
+                        <div class="w-full max-w-4xl glass-effect rounded-xl p-8 fade-in">
+                            <pre class="font-mono text-zinc-100 overflow-auto whitespace-pre-wrap break-words">${paste.content}</pre>
+                        </div>
+                    </div>
+
+                    <div class="glass-effect border-t border-zinc-700">
+                        <div class="max-w-4xl mx-auto px-6 py-6 flex gap-4">
+                            <button 
+                                id="backBtn"
+                                class="glow-button flex items-center gap-2 px-6 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white font-semibold"
+                            >
+                                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                                Back
+                            </button>
+                            <button 
+                                id="copyContentBtn"
+                                class="glow-button flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg text-white font-semibold"
+                            >
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                Copy Content
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            lucide.createIcons();
+
+            document.getElementById('backBtn').addEventListener('click', renderHome);
+
+            document.getElementById('copyContentBtn').addEventListener('click', () => {
+                navigator.clipboard.writeText(paste.content);
+                const btn = document.getElementById('copyContentBtn');
+                btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>Copied!';
+                setTimeout(() => {
+                    btn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i>Copy Content';
+                    lucide.createIcons();
+                }, 1500);
+            });
+
+            const timerEl = document.getElementById('viewTimer');
+            const updateTimer = () => {
+                if (paste && paste.expiryTime) {
+                    const remaining = paste.expiryTime - Date.now();
+                    timerEl.textContent = `in ${formatTime(remaining)}`;
+                    if (remaining <= 0) {
+                        pastes.delete(id);
+                        renderExpired();
+                    } else {
+                        setTimeout(updateTimer, 100);
+                    }
+                }
+            };
+            updateTimer();
+        }
+
+        function renderExpired() {
+            app.innerHTML = `
+                <div class="flex-1 flex flex-col items-center justify-center px-4 py-12">
+                    <div class="mb-8 fade-in">
+                        <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center">
+                            <i data-lucide="alert-circle" class="w-8 h-8 text-white"></i>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-12 fade-in" style="animation-delay: 0.1s">
+                        <h1 class="text-4xl font-bold text-white mb-4">Content Expired</h1>
+                        <p class="text-lg text-zinc-400">This paste was automatically deleted after 2 minutes.</p>
+                    </div>
+
+                    <button 
+                        id="homeBtn"
+                        class="glow-button px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg text-white font-semibold fade-in"
+                        style="animation-delay: 0.2s"
+                    >
+                        Create New Paste
+                    </button>
+                </div>
+            `;
+
+            lucide.createIcons();
+            document.getElementById('homeBtn').addEventListener('click', renderHome);
+        }
+
+        function renderNotFound() {
+            app.innerHTML = `
+                <div class="flex-1 flex flex-col items-center justify-center px-4 py-12">
+                    <div class="mb-8 fade-in">
+                        <div class="w-16 h-16 bg-gradient-to-br from-slate-500 to-zinc-600 rounded-full flex items-center justify-center">
+                            <i data-lucide="search-x" class="w-8 h-8 text-white"></i>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-12 fade-in" style="animation-delay: 0.1s">
+                        <h1 class="text-4xl font-bold text-white mb-4">Not Found</h1>
+                        <p class="text-lg text-zinc-400">This paste doesn't exist or has already been deleted.</p>
+                    </div>
+
+                    <button 
+                        id="homeBtn2"
+                        class="glow-button px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg text-white font-semibold fade-in"
+                        style="animation-delay: 0.2s"
+                    >
+                        Create New Paste
+                    </button>
+                </div>
+            `;
+
+            lucide.createIcons();
+            document.getElementById('homeBtn2').addEventListener('click', renderHome);
+        }
+
+        renderHome();
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e792d03878b098d',t:'MTc3NTM5ODY0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

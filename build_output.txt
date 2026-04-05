@@ -1,0 +1,31 @@
+ WARN  Issue while reading "/Users/leo/.npmrc". EPERM: operation not permitted, open '/Users/leo/.npmrc'
+
+> just-id-frontend@0.1.0 build /Volumes/Work/PetProjects/2_just_id/src/just-id-frontend
+> tsc -b && vite build
+
+vite v6.4.1 building for production...
+transforming...
+✓ 3117 modules transformed.
+✗ Build failed in 2.61s
+error during build:
+src/components/Editor.tsx (7:7): "default" is not exported by "node_modules/.pnpm/@lexical+react@0.42.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_yjs@13.6.30/node_modules/@lexical/react/LexicalErrorBoundary.prod.mjs", imported by "src/components/Editor.tsx".
+file: /Volumes/Work/PetProjects/2_just_id/src/just-id-frontend/src/components/Editor.tsx:7:7
+
+5: import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+6: import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
+7: import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
+          ^
+8: import { ToolbarPlugin } from "./lexical/plugins/ToolbarPlugin";
+9: import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+
+    at getRollupError (file:///Volumes/Work/PetProjects/2_just_id/src/just-id-frontend/node_modules/.pnpm/rollup@4.60.1/node_modules/rollup/dist/es/shared/parseAst.js:406:41)
+    at error (file:///Volumes/Work/PetProjects/2_just_id/src/just-id-frontend/node_modules/.pnpm/rollup@4.60.1/node_modules/rollup/dist/es/shared/parseAst.js:402:42)
+    at Module.error (file:///Volumes/Work/PetProjects/2_just_id/src/just-id-frontend/node_modules/.pnpm/rollup@4.60.1/node_modules/rollup/dist/es/shared/node-entry.js:17380:16)
+    at Module.traceVariable (file:///Volumes/Work/PetProjects/2_just_id/src/just-id-frontend/node_modules/.pnpm/rollup@4.60.1/node_modules/rollup/dist/es/shared/node-entry.js:17813:29)
+    at ModuleScope.findVariable (file:///Volumes/Work/PetProjects/2_just_id/src/just-id-frontend/node_modules/.pnpm/rollup@4.60.1/node_modules/rollup/dist/es/shared/node-entry.js:15403:39)
+    at FunctionScope.findVariable (file:///Volumes/Work/PetProjects/2_just_id/src/just-id-frontend/node_modules/.pnpm/rollup@4.60.1/node_modules/rollup/dist/es/shared/node-entry.js:5676:38)
+    at FunctionBodyScope.findVariable (file:///Volumes/Work/PetProjects/2_just_id/src/just-id-frontend/node_modules/.pnpm/rollup@4.60.1/node_modules/rollup/dist/es/shared/node-entry.js:5676:38)
+    at Identifier.bind (file:///Volumes/Work/PetProjects/2_just_id/src/just-id-frontend/node_modules/.pnpm/rollup@4.60.1/node_modules/rollup/dist/es/shared/node-entry.js:5450:40)
+    at Property.bind (file:///Volumes/Work/PetProjects/2_just_id/src/just-id-frontend/node_modules/.pnpm/rollup@4.60.1/node_modules/rollup/dist/es/shared/node-entry.js:2832:23)
+    at ObjectExpression.bind (file:///Volumes/Work/PetProjects/2_just_id/src/just-id-frontend/node_modules/.pnpm/rollup@4.60.1/node_modules/rollup/dist/es/shared/node-entry.js:2828:28)
+ ELIFECYCLE  Command failed with exit code 1.
