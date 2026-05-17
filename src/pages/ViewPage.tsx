@@ -9,11 +9,19 @@ export function ViewPage() {
   const navigate = useNavigate();
   const [paste, setPaste] = useState<PasteResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showLoader, setShowLoader] = useState(false);
   const [errorState, setErrorState] = useState<{
     type: "expired" | "not_found" | "error";
     message: string;
     description: string;
   } | null>(null);
+
+  // Only show loading indicator after a short delay to avoid blink on fast loads
+  useEffect(() => {
+    if (!loading) return;
+    const timer = setTimeout(() => setShowLoader(true), 300);
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   useEffect(() => {
     if (!id || id.length !== 4) {
@@ -73,10 +81,12 @@ export function ViewPage() {
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
         <div className="w-full max-w-3xl flex flex-col items-center">
           {loading ? (
-            <div className="flex flex-col items-center gap-6 animate-pulse-soft">
-              <div className="text-4xl font-black tracking-tighter text-gray-200">...</div>
-              <div className="text-sm font-bold text-gray-400 uppercase tracking-widest">Fetching content</div>
-            </div>
+            showLoader ? (
+              <div className="flex flex-col items-center gap-6 animate-pulse-soft">
+                <div className="text-4xl font-black tracking-tighter text-gray-200">...</div>
+                <div className="text-sm font-bold text-gray-400 uppercase tracking-widest">Fetching content</div>
+              </div>
+            ) : null
           ) : paste ? (
             <ContentView
               content={paste.content}
