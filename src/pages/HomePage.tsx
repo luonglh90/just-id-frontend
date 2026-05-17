@@ -35,7 +35,7 @@ export function HomePage() {
       refetch();
 
       try {
-        await navigator.clipboard.writeText(res.url);
+        await navigator.clipboard.writeText(`${window.location.origin}/${res.id}`);
       } catch {
         /* noop */
       }
