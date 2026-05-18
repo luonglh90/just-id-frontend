@@ -19,21 +19,13 @@ export function HomePage() {
     setSubmitting(true);
     setError(null);
 
-    // Wait for Turnstile token. Invisible challenges typically take 1-3s but
-    // can take longer on slow networks or when Cloudflare issues a managed
-    // challenge. Poll up to ~10s before giving up.
-    let token = turnstileRef.current?.getToken();
-    if (!token) {
-      for (let i = 0; i < 100; i++) {
-        await new Promise((r) => setTimeout(r, 100));
-        token = turnstileRef.current?.getToken();
-        if (token) break;
-      }
-    }
+    // Trigger Turnstile widget on create — managed mode shows only when needed.
+    const token = await turnstileRef.current?.execute();
 
     if (!token) {
-      setError("Bot verification didn't load. Refresh and try again.");
+      setError("Bot verification failed. Please try again.");
       setSubmitting(false);
+      turnstileRef.current?.reset();
       return;
     }
 
@@ -84,7 +76,7 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center bg-background px-4 pt-20 pb-4 sm:pb-6 selection:bg-accent selection:text-white">
-      {/* Invisible Turnstile Widget */}
+      {/* Turnstile Widget — renders on Create click */}
       <TurnstileWidget ref={turnstileRef} />
 
       <main className="w-full max-w-4xl text-center space-y-8 snap-effect flex-1 flex flex-col items-center justify-center">
