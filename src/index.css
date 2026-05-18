@@ -37,7 +37,7 @@
 }
 
 .fade-in {
-  animation: fadeIn 0.4s ease-in;
+  animation: fadeIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .glass-effect {
@@ -55,8 +55,12 @@
 }
 
 .glow-button {
-  transition: all 0.3s ease;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 0.25s ease,
+              filter 0.25s ease;
   position: relative;
+  will-change: transform;
 }
 
 .glow-button:hover {
@@ -66,6 +70,7 @@
 
 .glow-button:active {
   transform: translateY(0);
+  transition-duration: 0.1s;
 }
 
 .timer-pulse {
@@ -200,11 +205,11 @@ textarea.home-paste-input {
 }
 
 .snap-effect {
-  animation: snap-in 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  animation: snap-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes snap-in {
-  0% { transform: scale(0.95); opacity: 0; }
+  0% { transform: scale(0.97); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
 

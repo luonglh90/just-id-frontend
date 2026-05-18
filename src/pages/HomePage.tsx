@@ -16,14 +16,24 @@ export function HomePage() {
   const handleCreate = useCallback(async (textToSubmit = content) => {
     if (!textToSubmit.trim() || submitting) return;
 
-    const token = turnstileRef.current?.getToken();
-    if (!token) {
-      setError("Bot verification pending. Please wait a moment and try again.");
-      return;
-    }
-
     setSubmitting(true);
     setError(null);
+
+    // Wait for Turnstile token (real keys take 1-3s to resolve)
+    let token = turnstileRef.current?.getToken();
+    if (!token) {
+      for (let i = 0; i < 30; i++) {
+        await new Promise((r) => setTimeout(r, 100));
+        token = turnstileRef.current?.getToken();
+        if (token) break;
+      }
+    }
+
+    if (!token) {
+      setError("Bot verification failed. Please try again.");
+      setSubmitting(false);
+      return;
+    }
 
     // Basic Delta for plain text to support Lexical viewer
     const delta = { root: { children: [{ type: "paragraph", children: [{ type: "text", version: 1, text: textToSubmit }], direction: "ltr", format: "", indent: 0, version: 1 }], direction: "ltr", format: "", indent: 0, type: "root", version: 1 } };
