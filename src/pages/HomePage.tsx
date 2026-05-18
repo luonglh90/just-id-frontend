@@ -56,15 +56,12 @@ export function HomePage() {
   }, [content, submitting, refetch]);
 
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    e.preventDefault();
     const pastedText = e.clipboardData.getData("Text");
     if (pastedText && pastedText.trim().length > 0) {
       setContent(pastedText);
-      // Auto submit on paste wait a tick for content to settle
-      setTimeout(() => {
-        handleCreate(pastedText);
-      }, 50);
     }
-  }, [handleCreate]);
+  }, []);
 
   const handleCreateAnother = useCallback(() => {
     setContent("");

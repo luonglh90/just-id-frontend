@@ -19,12 +19,15 @@ export function HomeResultState({ result, onCreateAnother }: HomeResultStateProp
 
   const shareUrl = `${window.location.origin}/${result.id}`;
 
+  const displayUrl = shareUrl.replace(/^https?:\/\/(www\.)?/, "");
+  const cleanUrl = `https://${displayUrl}`;
+
   const copyUrl = async () => {
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(cleanUrl);
     } catch {
       const textArea = document.createElement("textarea");
-      textArea.value = shareUrl;
+      textArea.value = cleanUrl;
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand("copy");
@@ -33,8 +36,6 @@ export function HomeResultState({ result, onCreateAnother }: HomeResultStateProp
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  const displayUrl = shareUrl.replace(/^https?:\/\/(www\.)?/, "");
 
   return (
     <div className="space-y-6 animate-fade-in relative z-10 w-full flex flex-col items-center">
@@ -86,7 +87,7 @@ export function HomeResultState({ result, onCreateAnother }: HomeResultStateProp
           Create New
         </button>
         <a
-          href={shareUrl}
+          href={cleanUrl}
           target="_blank"
           rel="noreferrer"
           className="glow-button min-w-56 px-10 py-4 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold text-lg shadow-[0_14px_34px_-16px_rgba(59,130,246,0.85)] hover:brightness-110 transition-all"

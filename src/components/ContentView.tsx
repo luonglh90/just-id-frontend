@@ -1,8 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useCountdown } from "@/hooks/useCountdown";
-import { formatCountdown } from "@/lib/utils";
+import { formatCountdown, detectJson } from "@/lib/utils";
 import DOMPurify from "dompurify";
 import { Link } from "react-router-dom";
+import { JsonView } from "./JsonView";
 
 interface ContentViewProps {
   content: string;
@@ -22,11 +23,21 @@ export function ContentView({ content, expiresAt, id }: ContentViewProps) {
     ALLOWED_ATTR: ["href", "target", "rel"],
   });
 
+  // Auto-detect JSON content
+  const jsonData = useMemo(() => detectJson(content), [content]);
+  const isJson = jsonData !== null;
+
   const handleCopyText = useCallback(async () => {
-    // Extract plain text from HTML
-    const div = document.createElement("div");
-    div.innerHTML = sanitizedContent;
-    const text = div.textContent || div.innerText || "";
+    let text: string;
+    if (isJson) {
+      // Copy formatted JSON
+      text = JSON.stringify(jsonData, null, 2);
+    } else {
+      // Extract plain text from HTML
+      const div = document.createElement("div");
+      div.innerHTML = sanitizedContent;
+      text = div.textContent || div.innerText || "";
+    }
 
     try {
       await navigator.clipboard.writeText(text);
@@ -35,7 +46,7 @@ export function ContentView({ content, expiresAt, id }: ContentViewProps) {
     } catch {
       /* noop */
     }
-  }, [sanitizedContent]);
+  }, [sanitizedContent, isJson, jsonData]);
 
   return (
     <div className="animate-fade-in space-y-6 sm:space-y-8 max-w-3xl mx-auto w-full">
@@ -66,10 +77,14 @@ export function ContentView({ content, expiresAt, id }: ContentViewProps) {
 
       {/* Content Card */}
       <div className="bg-white border-[4px] border-gray-200 rounded-[2.5rem] p-8 sm:p-14 shadow-sm hover:shadow-md transition-all">
-        <div
-          className="content-display text-xl sm:text-3xl font-medium text-black leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-        />
+        {isJson ? (
+          <JsonView data={jsonData} />
+        ) : (
+          <div
+            className="content-display text-xl sm:text-3xl font-medium text-black leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+          />
+        )}
       </div>
 
       {/* Actions */}

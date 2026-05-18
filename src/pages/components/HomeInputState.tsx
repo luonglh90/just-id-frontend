@@ -1,3 +1,6 @@
+import { useMemo } from "react";
+import { tryParseJson } from "@/lib/utils";
+
 type HomeInputStateProps = {
   content: string;
   submitting: boolean;
@@ -17,6 +20,8 @@ export function HomeInputState({
   onPaste,
   onCreate,
 }: HomeInputStateProps) {
+  const isJson = useMemo(() => tryParseJson(content) !== null, [content]);
+
   return (
     <div className="animate-fade-in relative z-10 w-full flex flex-col items-center space-y-12">
       <div className="w-full max-w-3xl mx-auto flex flex-col shrink-0 mb-6 mt-4">
@@ -26,13 +31,18 @@ export function HomeInputState({
         <p className="text-xl text-zinc-400 mb-8">Share content that disappears in 2 minutes</p>
 
         <div className="w-full h-64 bg-background border-2 border-black rounded-3xl p-6 mt-12 relative">
+          {isJson && (
+            <div className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-violet-100 text-violet-600 text-[10px] font-black uppercase tracking-wider z-10">
+              JSON
+            </div>
+          )}
           <textarea
             value={content}
             onChange={(e) => onContentChange(e.target.value)}
             onPaste={onPaste}
             disabled={submitting}
             placeholder="Paste your content here..."
-            className="home-paste-input w-full h-full resize-none bg-transparent border-0 outline-none ring-0 m-0 text-lg sm:text-xl"
+            className={`home-paste-input w-full h-full resize-none bg-transparent border-0 outline-none ring-0 m-0 ${isJson ? "font-mono text-sm sm:text-base" : "text-lg sm:text-xl"}`}
             autoFocus
           />
 
