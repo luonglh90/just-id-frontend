@@ -81,7 +81,7 @@ export function ViewPage() {
       <BrandHeader />
 
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-        <div className="w-full max-w-3xl flex flex-col items-center">
+        <div className="w-full max-w-3xl lg:max-w-5xl xl:max-w-6xl 2xl:max-w-7xl flex flex-col items-center">
           {loading ? (
             showLoader ? (
               <div className="flex flex-col items-center gap-6 animate-pulse-soft">

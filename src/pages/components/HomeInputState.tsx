@@ -1,5 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useCallback, useEffect, useRef } from "react";
 import { tryParseJson } from "@/lib/utils";
+
+const MAX_CONTENT_LENGTH = 5000;
 
 type HomeInputStateProps = {
   content: string;
@@ -21,33 +23,68 @@ export function HomeInputState({
   onCreate,
 }: HomeInputStateProps) {
   const isJson = useMemo(() => tryParseJson(content) !== null, [content]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const charCount = content.length;
+  const isOverLimit = charCount > MAX_CONTENT_LENGTH;
+  const isNearLimit = charCount > MAX_CONTENT_LENGTH * 0.9;
+
+  // Auto-grow textarea up to ~60% of viewport, then scroll internally.
+  const autoResize = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const maxHeight = window.innerHeight * 0.6;
+    el.style.height = "auto";
+    const next = Math.min(el.scrollHeight, maxHeight);
+    el.style.height = `${next}px`;
+    el.style.overflowY = el.scrollHeight > maxHeight ? "auto" : "hidden";
+  }, []);
+
+  useEffect(() => {
+    autoResize();
+  }, [content, autoResize]);
 
   return (
     <div className="animate-fade-in relative z-10 w-full flex flex-col items-center space-y-12">
-      <div className="w-full max-w-3xl mx-auto flex flex-col shrink-0 mb-6 mt-4">
+      <div className="w-full max-w-3xl lg:max-w-5xl xl:max-w-6xl 2xl:max-w-7xl mx-auto flex flex-col shrink-0 mb-6 mt-4">
         <h1 className="text-5xl sm:text-6xl font-black tracking-tight brand-text leading-tight">
           Just copy, baby.
         </h1>
         <p className="text-xl text-zinc-400 mb-8">Share content that disappears in 2 minutes</p>
 
-        <div className="w-full h-64 bg-background border-2 border-black rounded-3xl p-6 mt-12 relative">
+        <div className="w-full bg-background border-2 border-black rounded-3xl p-6 mt-12 relative">
           {isJson && (
             <div className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-violet-100 text-violet-600 text-[10px] font-black uppercase tracking-wider z-10">
               JSON
             </div>
           )}
           <textarea
+            ref={textareaRef}
             value={content}
             onChange={(e) => onContentChange(e.target.value)}
             onPaste={onPaste}
             disabled={submitting}
             placeholder="Paste your content here..."
-            className={`home-paste-input w-full h-full resize-none bg-transparent border-0 outline-none ring-0 m-0 ${isJson ? "font-mono text-sm sm:text-base" : "text-lg sm:text-xl"}`}
+            maxLength={MAX_CONTENT_LENGTH}
+            className={`home-paste-input w-full h-64 resize-none bg-transparent border-0 outline-none ring-0 m-0 pb-6 ${isJson ? "font-mono text-sm sm:text-base" : "text-lg sm:text-xl"}`}
             autoFocus
           />
 
+          <div
+            className={`absolute bottom-3 right-4 text-[11px] font-mono font-bold tabular-nums tracking-wider z-10 transition-colors ${
+              isOverLimit
+                ? "text-red-500"
+                : isNearLimit
+                  ? "text-amber-500"
+                  : "text-zinc-400"
+            }`}
+            aria-live="polite"
+          >
+            {charCount.toLocaleString()} / {MAX_CONTENT_LENGTH.toLocaleString()}
+          </div>
+
           {submitting && (
-            <div className="absolute inset-0 bg-background/80 rounded-[3.5rem] flex items-center justify-center backdrop-blur-[2px] z-20">
+            <div className="absolute inset-0 bg-background/80 rounded-3xl flex items-center justify-center backdrop-blur-[2px] z-20">
               <div className="animate-pulse flex items-center gap-4">
                 <div className="w-4 h-4 bg-foreground rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                 <div className="w-4 h-4 bg-foreground rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -57,7 +94,7 @@ export function HomeInputState({
           )}
         </div>
 
-        <div className="justify-center fade-in pt-10">
+        <div className="flex justify-center pt-6">
           <button
             type="button"
             onClick={onCreate}
@@ -72,10 +109,9 @@ export function HomeInputState({
             Get Code
           </button>
         </div>
-        <div className="h-6 sm:h-6 shrink-0" aria-hidden />
       </div>
 
-      {error && <div className="mt-8 text-red-500 font-bold bg-red-50/50 px-6 py-3 rounded-full border border-red-100/50 text-sm">{error}</div>}
+      {error && <div className="mt-4 text-red-500 font-bold bg-red-50/50 px-6 py-3 rounded-full border border-red-100/50 text-sm">{error}</div>}
     </div>
   );
 }

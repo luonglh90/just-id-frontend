@@ -49,7 +49,7 @@ export function ContentView({ content, expiresAt, id }: ContentViewProps) {
   }, [sanitizedContent, isJson, jsonData]);
 
   return (
-    <div className="animate-fade-in space-y-6 sm:space-y-8 max-w-3xl mx-auto w-full">
+    <div className="animate-fade-in space-y-6 sm:space-y-8 max-w-3xl lg:max-w-5xl xl:max-w-6xl 2xl:max-w-7xl mx-auto w-full">
       {/* Meta Info */}
       <div className="flex items-center justify-between px-2 sm:px-4">
         <Link

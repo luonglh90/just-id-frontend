@@ -72,11 +72,11 @@ export function HomePage() {
   const canSubmit = Boolean(content.trim()) && !submitting;
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center bg-background px-4 pt-20 pb-4 sm:pb-6 selection:bg-accent selection:text-white">
+    <div className="min-h-screen w-full flex flex-col items-center bg-background px-4 pt-20 pb-2 selection:bg-accent selection:text-white">
       {/* Turnstile Widget — renders on Create click */}
       <TurnstileWidget ref={turnstileRef} />
 
-      <main className="w-full max-w-4xl text-center space-y-8 snap-effect flex-1 flex flex-col items-center justify-center">
+      <main className="w-full max-w-3xl lg:max-w-5xl xl:max-w-6xl 2xl:max-w-7xl text-center space-y-8 snap-effect flex-1 flex flex-col items-center justify-center">
         {result ? (
           <HomeResultState result={result} onCreateAnother={handleCreateAnother} />
         ) : (

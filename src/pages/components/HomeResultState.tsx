@@ -20,14 +20,14 @@ export function HomeResultState({ result, onCreateAnother }: HomeResultStateProp
   const shareUrl = `${window.location.origin}/${result.id}`;
 
   const displayUrl = shareUrl.replace(/^https?:\/\/(www\.)?/, "");
-  const cleanUrl = `https://${displayUrl}`;
+  const cleanForCopy = displayUrl;
 
   const copyUrl = async () => {
     try {
-      await navigator.clipboard.writeText(cleanUrl);
+      await navigator.clipboard.writeText(cleanForCopy);
     } catch {
       const textArea = document.createElement("textarea");
-      textArea.value = cleanUrl;
+      textArea.value = cleanForCopy;
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand("copy");
@@ -87,7 +87,7 @@ export function HomeResultState({ result, onCreateAnother }: HomeResultStateProp
           Create New
         </button>
         <a
-          href={cleanUrl}
+          href={shareUrl}
           target="_blank"
           rel="noreferrer"
           className="glow-button min-w-56 px-10 py-4 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold text-lg shadow-[0_14px_34px_-16px_rgba(59,130,246,0.85)] hover:brightness-110 transition-all"
