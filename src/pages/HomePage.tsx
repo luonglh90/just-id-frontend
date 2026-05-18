@@ -19,10 +19,12 @@ export function HomePage() {
     setSubmitting(true);
     setError(null);
 
-    // Wait for Turnstile token (real keys take 1-3s to resolve)
+    // Wait for Turnstile token. Invisible challenges typically take 1-3s but
+    // can take longer on slow networks or when Cloudflare issues a managed
+    // challenge. Poll up to ~10s before giving up.
     let token = turnstileRef.current?.getToken();
     if (!token) {
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 100; i++) {
         await new Promise((r) => setTimeout(r, 100));
         token = turnstileRef.current?.getToken();
         if (token) break;

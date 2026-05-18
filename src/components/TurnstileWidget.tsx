@@ -16,7 +16,10 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
     const turnstileRef = useRef<TurnstileInstance>(null);
     const tokenRef = useRef<string | null>(null);
 
-    const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
+    // Dev fallback: invisible test key (always passes). The visible test key
+    // (...AA) does NOT emit a token when rendered with size: "invisible".
+    const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000BB";
+    console.log("[Turnstile] siteKey:", siteKey);
 
     useImperativeHandle(ref, () => ({
       getToken: () => tokenRef.current,
