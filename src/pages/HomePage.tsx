@@ -30,7 +30,7 @@ export function HomePage() {
     }
 
     if (!token) {
-      setError("Bot verification failed. Please try again.");
+      setError("Bot verification didn't load. Refresh and try again.");
       setSubmitting(false);
       return;
     }
