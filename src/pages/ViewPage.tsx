@@ -34,9 +34,11 @@ export function ViewPage() {
       return;
     }
 
+    const normalizedId = id.toUpperCase();
+
     const fetchPaste = async () => {
       try {
-        const data = await getPaste(id);
+        const data = await getPaste(normalizedId);
         setPaste(data);
       } catch (err) {
         if (err instanceof ApiRequestError) {
