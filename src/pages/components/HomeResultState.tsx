@@ -34,7 +34,7 @@ export function HomeResultState({ result, onCreateAnother }: HomeResultStateProp
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const displayUrl = shareUrl.replace(/^https?:\/\//, "");
+  const displayUrl = shareUrl.replace(/^https?:\/\/(www\.)?/, "");
 
   return (
     <div className="space-y-6 animate-fade-in relative z-10 w-full flex flex-col items-center">
