@@ -1,12 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getStatus, type StatusResponse } from "@/lib/api";
-
-const NORMAL_POLL_MS = 30_000;
 
 export function useStatus() {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const hasFetched = useRef(false);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -21,10 +20,10 @@ export function useStatus() {
   }, []);
 
   useEffect(() => {
+    // Only fetch once on mount (avoids double-fetch in Strict Mode)
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     fetchStatus();
-
-    const timer = setInterval(fetchStatus, NORMAL_POLL_MS);
-    return () => clearInterval(timer);
   }, [fetchStatus]);
 
   return { status, loading, error, refetch: fetchStatus };
